@@ -1,0 +1,171 @@
+;; Tanya Khan
+;; takhan
+
+;; Mansi Gera
+;; mgera
+
+;; •Your solutions to the following problems should use helper functions in place of repeated code and to improve the readability of your code.
+;; •Remember to include a signature, purpose, and test cases for every function you write, including helpers.
+;; •Make sure you read each problem carefully and create a signature that conforms to the problem description. You must name each function with the exact name specified in the problem.
+;; •Your signature must conform to the problem description. Otherwise, we won't be able to run our automated tester on your program, and you'll lose points.
+;; •Programs that don't work with our auto-tester (and thus must be tested manually) will be penalized with a deduction of 10% of the total number of points for the assignment.
+;; •Each test case you develop should be annotated with a brief comment that describes the situation being tested.
+
+
+;  Problem 1 (20 Points) Provide data definitions for both a Film and a Date. Include both the define-structs and at least three examples for each data definition.
+; When creating a struct, the order of the fields in the constructor should match the order given in the descriptions above.
+; The names of the fields in the struct don't matter, but the order does.
+; For example, the fields of the struct for a film should be the title, genre, rating, running time, opening date, and receipts collected, in that order.
+; Failure to define the fields in the given order will cause our auto-tester to fail, and you will lose points. Your struct for a Date should have 3 fields,
+; one for the year, one for the month, and one for the day, in that order. Each field in a Date is of type Natural.
+
+;; Natural Natural Natural -> Natural Natural Natural
+;; (define-struct Date (year month day)0)
+(define-struct date (year month day))
+
+(define TANGLED-DATE(make-date 2010 11 14))
+(define CLUELESS-DATE(make-date 1995 07 19))
+(define THE-GODFATHER-DATE(make-date 1972 04 24))
+
+;; String String String Natural Natural Natural -> String String String Natural Natural Natural
+;; (define-struct Film (title genre rating running-time opening-date receipts-collected)0)
+(define-struct film (title genre rating running-time opening-date receipts-collected))
+
+(define TANGLED (make-film "tangled" "family" "PG" 140 TANGLED-DATE 60))
+(define CLUELESS (make-film "clueless" "teen" "PG-13" 93 CLUELESS-DATE 237))
+(define THE-GODFATHER (make-film "the godfather" "drama" "R" 102 THE-GODFATHER-DATE 500))
+
+
+; Problem 2 (15 Points)  In a comment in the Definitions Window, state the signatures of all the procedures that are created by Racket
+; for your Film struct. 
+
+;; Constructor:
+;;
+;; make-film: String String String Natural Natural Natural -> Film
+;; consumes a film's name, genre, rating, running-time, and receipts collected to produce a film
+;;
+;; Selector:
+;;
+;; film-name: Film -> String
+;; consumes a film to produce its name
+;;
+;; film-genre: Film -> String
+;; consumes a film to produce a genre
+;;
+;; film-rating: Film -> String
+;; consumes a film to produce a rating
+;;
+;; film-running-time: Film -> Natural
+;; consumes a film to produce its running time
+;;
+;; film-opening-date: Film -> Natural
+;; consumes a film to produce its opening date
+;;
+;; film-receipts-collected: Film -> Natural
+;; consumes a film to produce the film's receipts collected
+;;
+;; Predicate:
+;;
+;; film? any type -> Boolean
+;; consumes anything and only produces true when it is a film
+
+
+; Problem 3 (20 Points) Write a function suitable-for-children? which consumes a Film and returns true its rating is G, PG, or PG-13, and
+; returns false otherwise.
+
+
+(define (suitable-for-children? a-film)
+  (or(string=? (film-rating a-film) "G")
+     (string=? (film-rating a-film) "PG")
+     (string=? (film-rating a-film) "PG-13")))
+
+(check-expect(suitable-for-children? THE-GODFATHER)#false)
+(check-expect(suitable-for-children? TANGLED)#true)
+(check-expect(suitable-for-children? CLUELESS)#true)
+
+
+; Problem 4 (20 Points) Write a function difference-in-receipts which consumes two Films and produces a Number. The number
+; produced is the difference between the box office receipts for the two films (the result should be a non-negative number). 
+
+
+(define (difference-in-receipts a-film b-film)
+  (abs (-(film-receipts-collected a-film) (film-receipts-collected b-film))))
+
+(check-expect(difference-in-receipts THE-GODFATHER TANGLED)440)
+(check-expect(difference-in-receipts TANGLED THE-GODFATHER)440)
+(check-expect(difference-in-receipts CLUELESS TANGLED)177)
+
+
+; Problem 5 (20 Points) Write a function modify-rating which consumes a Film and a String (representing a rating), and produces
+; a Film. The Film that is produced is the same as the original except that its rating has been replaced by the given rating. 
+
+
+(define (modify-rating a-film a-string)
+  (make-film (film-title a-film) (film-genre a-film)  a-string (film-running-time a-film) (film-opening-date a-film) (film-receipts-collected a-film)))  
+
+(check-expect (modify-rating TANGLED "R") (make-film "tangled" "family" "R" 140 TANGLED-DATE 60))
+(check-expect (modify-rating THE-GODFATHER "G") (make-film "the godfather" "drama" "G" 102 THE-GODFATHER-DATE 500))
+(check-expect (modify-rating CLUELESS "PG") (make-film "clueless" "teen" "PG" 93 CLUELESS-DATE 237))
+
+
+  
+; Problem 6 (25 Points) Write a function opens-before? which consumes a Film and a Date, and produces a Boolean. The function
+; produces true if the given Film opens before the given Date, and returns false otherwise. 
+
+
+;(define (opens-before? a-film a-date) true) ;stub
+
+(define (compare-date? a-date b-date)
+  (cond [(< (date-year a-date) (date-year b-date)) #true]
+        ([> (date-year a-date) (date-year b-date)] #false)
+        [else (cond [(< (date-month a-date) (date-month b-date)) #true]
+                    ([> (date-month a-date) (date-month b-date)] #false)
+                     [else (cond [(< (date-day a-date) (date-day b-date)) #true]
+                                 [(> (date-day a-date) (date-day b-date)) #false]
+                                 [else #false])])]))
+
+
+            
+(define (opens-before? a-film b-date)
+  (compare-date? (film-opening-date a-film) b-date))
+
+(check-expect (opens-before? TANGLED (make-date 2021 12 20))#true)
+(check-expect (opens-before? THE-GODFATHER (make-date 1960 02 22)) #false)
+(check-expect (opens-before? THE-GODFATHER (make-date 1972 05 21)) #true)
+(check-expect (opens-before? CLUELESS (make-date 1995 06 02)) #false)
+(check-expect (opens-before? CLUELESS (make-date 1995 07 20)) #true)
+(check-expect (opens-before? TANGLED (make-date 2010 11 15)) #true)
+(check-expect (opens-before? CLUELESS (make-date 1995 07 19)) #false)
+(check-expect (opens-before? TANGLED (make-date 2010 11 15)) #true)
+(check-expect (opens-before? CLUELESS (make-date 1995 07 12)) #false)
+
+
+
+;   (cond
+;     [(> 100 200) "external"]
+;     [(< 100 200) "interior" ]
+;     [else "intersect"])
+
+  ;; Step 1: compare the years of the opening date for a-film and a-date
+  ;; Step 2: if the opening year is earlier than the date year, proceed to comparing the months of the two variables
+  ;; Step 3: if the opening year is later than the date year, return false
+  ;; Step 4: if (3) is true, compare months
+  ;; Step 5: if opening month is earlier than date month, proceed to comparing days of two vars
+  ;; Step 6: if opening month is later than date month, return false
+  ;; Step 7: if (5) is true, compare days
+  ;; Step 8: if opening day is earlier than date day, return true
+  ;; Step 9: if opening day is later than date day, return false
+
+  ;; We are trying to figure out if the film opens before the given date
+
+  
+
+  
+  
+
+
+  
+
+
+
+  
